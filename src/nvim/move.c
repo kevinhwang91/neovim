@@ -589,6 +589,7 @@ static void curs_rows(win_T *wp)
         --i;                            // hold at inserted lines
       }
     }
+    ELOG("lnum: %ld, valid: %d ", lnum, valid);
     if (valid && (lnum != wp->w_topline || !win_may_fill(wp))) {
       lnum = wp->w_lines[i].wl_lastlnum + 1;
       // Cursor inside folded lines, don't count this row
@@ -596,6 +597,7 @@ static void curs_rows(win_T *wp)
         break;
       }
       wp->w_cline_row += wp->w_lines[i].wl_size;
+      ELOG("wp->w_cline_row: %d, wl_size: %d", wp->w_cline_row, wp->w_lines[i].wl_size);
     } else {
       linenr_T last = lnum;
       bool folded;
@@ -605,6 +607,7 @@ static void curs_rows(win_T *wp)
         break;
       }
       wp->w_cline_row += n;
+      ELOG("wp->w_cline_row: %d, n: %d", wp->w_cline_row, n);
     }
   }
 
@@ -775,6 +778,7 @@ void curs_columns(win_T *wp, int may_scroll)
   endcol += extra;
 
   // Now compute w_wrow, counting screen lines from w_cline_row.
+  ELOG("wp->wrow: %d, wp->w_cline_row: %d\n", wp->w_wrow, wp->w_cline_row);
   wp->w_wrow = wp->w_cline_row;
 
   int textwidth = wp->w_width_inner - extra;

@@ -25,6 +25,7 @@
 #include "nvim/getchar.h"
 #include "nvim/globals.h"
 #include "nvim/hashtab.h"
+#include "nvim/log.h"
 #include "nvim/main.h"
 #include "nvim/mark.h"
 #include "nvim/match.h"
@@ -6186,14 +6187,17 @@ void scroll_to_fraction(win_T *wp, int prev_height)
       lnum = 1;
     }
     wp->w_wrow = ((long)wp->w_fraction * (long)height - 1L) / FRACTION_MULT;
+    ELOG("winid: %d fraction: %d height: %d raw_wrow: %d\n",wp->handle, wp->w_fraction, wp->w_height_inner, wp->w_wrow);
     line_size = plines_win_col(wp, lnum, (long)(wp->w_cursor.col)) - 1;
     sline = wp->w_wrow - line_size;
+    ELOG("sline: %d\n", sline);
 
     if (sline >= 0) {
       // Make sure the whole cursor line is visible, if possible.
       const int rows = plines_win(wp, lnum, false);
 
       if (sline > wp->w_height_inner - rows) {
+        ELOG("w_height_inner: %d rows: %d\n", wp->w_height_inner, rows);
         sline = wp->w_height_inner - rows;
         wp->w_wrow -= rows - line_size;
       }
@@ -6217,6 +6221,7 @@ void scroll_to_fraction(win_T *wp, int prev_height)
         }
       }
     } else if (sline > 0) {
+      ELOG("topline: %ld\n", wp->w_topline);
       while (sline > 0 && lnum > 1) {
         (void)hasFoldingWin(wp, lnum, &lnum, NULL, true, NULL);
         if (lnum == 1) {
@@ -6231,10 +6236,13 @@ void scroll_to_fraction(win_T *wp, int prev_height)
                       + wp->w_topfill;
         } else {
           line_size = plines_win(wp, lnum, true);
+          ELOG("line_size: %d\n", line_size);
         }
         sline -= line_size;
+        ELOG("lnum: %ld, line_size: %d\n", lnum, line_size);
       }
 
+      ELOG("after sline: %d\n", sline);
       if (sline < 0) {
         /*
          * Line we want at top would go off top of screen.  Use next
@@ -6249,6 +6257,8 @@ void scroll_to_fraction(win_T *wp, int prev_height)
         wp->w_wrow -= sline;
       }
     }
+
+    ELOG("wp->wrow: %d\n", wp->w_wrow);
     set_topline(wp, lnum);
   }
 
@@ -6256,7 +6266,9 @@ void scroll_to_fraction(win_T *wp, int prev_height)
     if (get_scrolloff_value(wp)) {
       update_topline(wp);
     }
+    ELOG("wp->wrow: %d\n", wp->w_wrow);
     curs_columns(wp, false);        // validate w_wrow
+    ELOG("wp->wrow: %d\n", wp->w_wrow);
   }
   if (prev_height > 0) {
     wp->w_prev_fraction_row = wp->w_wrow;
