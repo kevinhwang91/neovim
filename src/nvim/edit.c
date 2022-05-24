@@ -2105,9 +2105,9 @@ bool vim_is_ctrl_x_key(int c)
   FUNC_ATTR_WARN_UNUSED_RESULT
 {
   // Always allow ^R - let its results then be checked
-  if (c == Ctrl_R) {
-    return true;
-  }
+  // if (c == Ctrl_R) {
+  //   return true;
+  // }
 
   // Accept <PageUp> and <PageDown> if the popup menu is visible.
   if (ins_compl_pum_key(c)) {
